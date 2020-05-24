@@ -1,2 +1,2 @@
-*.agdai
-MAlonzo/**
+# Synology Diskstation
+.DS_Store
