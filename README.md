@@ -1,6 +1,8 @@
 # Solarpower at AISVN
 
-Collect data from solar panel and wind generator at AISVN - project for IB Physics
+Collect data from solar panel and wind generator at AISVN - project for IB Physics. Here the battery voltage over the first week:
+
+![battery first week](pic/2020-05-26_week.jpg)
 
 # Pictures for solarpower
 
