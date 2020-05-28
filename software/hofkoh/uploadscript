@@ -1,0 +1,14 @@
+#!/bin/bash 
+if [ -f /tmp/owdata/data.js ]
+then
+ 	  rm /tmp/owdata/data.js
+fi
+
+up='uptime_now="'$(uptime)'";'
+echo $up >> /tmp/owdata/data.js
+tempe='temperatur="'$(date +%Y%m%d)" "$(date +%R)" "$(cat /tmp/1wire/28.09390E020000/temperature)'";'
+echo -e $tempe >> /tmp/owdata/data.js
+wlan='wlan="'`iwconfig wlan0 | grep 'Link Quality'`'";'
+echo -e $wlan >> /tmp/owdata/data.js
+
+sh /usr/1wire/upload data.js
