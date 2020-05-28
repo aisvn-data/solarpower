@@ -1,0 +1,12 @@
+#!/bin/bash 
+datum=$(date +%Y%m%d)
+logfile=/tmp/owdata/$datum.log
+if [ ! -f /tmp/owdata/$datum.log ]
+then
+ 	  echo -e "YYYMMDD HH:MM measured temperature" >> $logfile
+fi
+
+messwert=$(date +%Y%m%d)" "$(date +%R)" "
+messwert=$messwert$(cat /tmp/1wire/28.09390E020000/temperature)
+
+echo -e $messwert >> $logfile
