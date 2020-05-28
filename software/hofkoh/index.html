@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+ <meta http-equiv="content-type" content="text/html; charset=utf-8">
+ <meta name="viewport" content="width=device-width; initial-scale=1.0;" />
+
+ <link rel="stylesheet" type="text/css" href="style.css">
+
+ <script type="text/javascript" src="data.js"></script> <!-- Daten der letzten Stunde in Variablen -->
+ <script type="text/javascript" src="jquery-1.4.1.min.js"></script><!-- um Datei laden zu können -->
+ <script type="text/javascript" src="https://www.google.com/jsapi"></script><!-- für graph/charts -->
+ <script type="text/javascript" src="tempdata.js"></script><!-- nur vorübergehend!-->
+ <script type="text/javascript" src="dynamic.js"></script><!-- Visualisierung, Aktualisierung Daten-->
+</head>
+<body>
+ <p>Datum und Zeit: <span id="tempea">[script loading]</span></p>
+ <p>Temperatur:</p> <p style="text-align:center;">
+  <span style="text-align:center; margin:10px; padding:10px; font-size: x-large; background:lightgreen;">
+   <span id="tempeb">10</span> °C 
+  </span> 
+ </p> 
+ <p><span id="uptime">0d 00:00:01</span></p> 
+ <p><span id="wlan">00/00</span> 
+ <span style="float:right;"><a href="info.pdf">Information</a></span></p>
+
+ <div id="chart_div" style="width: 100%; height: 500px;"></div>
+ <p>heute:<pre style="margin:10px;"><span id="heute">text wird ersetzt</span></pre></p> 
+ <p>gestern:<pre style="margin:10px;"><span id="gestern">text wird ersetzt</span></pre></p> 
+ <div id="Fuss"><small><a name="bottom">© 2009-2016</a> Matthias Kreier</small></div>
+</body>
+</html> 
