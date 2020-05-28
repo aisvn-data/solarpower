@@ -1,0 +1,3 @@
+#!/bin/bash 
+# start crond
+/usr/sbin/crond -c /etc/crontabs
