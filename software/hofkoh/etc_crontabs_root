@@ -1,0 +1,3 @@
+*/10 * * * * sh /usr/1wire/tempscript
+1    * * * * sh /usr/1wire/uploadscript
+58   * * * * sh /usr/1wire/uploadday
