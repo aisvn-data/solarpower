@@ -1,0 +1,12 @@
+#!/bin/sh /etc/rc.common
+START=11
+STOP=15
+start() {
+ 	  echo start
+}
+stop() {
+ 	  echo stop
+}
+boot() {
+ 	  sh /usr/1wire/startowfs
+}
