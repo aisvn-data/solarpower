@@ -1,0 +1,3 @@
+#!/bin/bash 
+datum=$(date +%Y%m%d)
+sh /usr/1wire/upload $datum.log
