@@ -1,0 +1,5 @@
+#!/bin/bash 
+if [ -f /tmp/owdata/$1 ]
+then
+ 	  wput -u /tmp/owdata/$1 ftp://ftpuser0815:Macht42Sinn@hofkoh.de/data/$1
+fi
