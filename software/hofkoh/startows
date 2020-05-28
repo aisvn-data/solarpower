@@ -1,0 +1,6 @@
+#!/bin/bash 
+if [ ! -d /tmp/1wire ]; then 
+ 	  mkdir /tmp/1wire 
+fi 
+owfs –allow_other -u /tmp/1wire 
+mkdir /tmp/owdata
