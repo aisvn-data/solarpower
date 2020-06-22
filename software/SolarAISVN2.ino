@@ -1,5 +1,5 @@
-// Solar- and windmeter at AISVN2 v0.1
-// 2020/06/18
+// Solar- and windmeter at AISVN2 v0.2
+// 2020/06/19
 //
 // pin:          34,       35,     32,       33,       25,    12
 // value:  currentA, currentB, solar3, battery2, load_OUT, LiPo2
@@ -30,7 +30,7 @@ const char* server = "maker.ifttt.com";
 // Time to sleep
 uint64_t uS_TO_S_FACTOR = 1000000;  // Conversion factor for micro seconds to seconds
 // sleep for 2 minutes = 120 seconds
-uint64_t TIME_TO_SLEEP = 20;
+uint64_t TIME_TO_SLEEP = 120;
 
 // pin:          34,       35,     32,       33,    12,       25
 // value:  currentA, currentB, solar3, battery2, LiPo2, load_OUT 
@@ -64,7 +64,7 @@ void setup() {
   measureVoltages();
 
   // battery too low? switch off load via pin_LOAD in rtc
-  if(voltage[2] < 1400) {
+  if(voltage[1] < 12600) {
     rtc_gpio_set_level(pin_LOAD,0); // GPIO LOW
     voltage[5] = 0;
   } else {
@@ -194,10 +194,12 @@ void measureVoltages() {
   
   //voltage[0] = int((4096 - voltage[0]) * 7.52 - 1000);  // pin32 solar    voltage divider 10k : 1.2 k Ohm 1:1
   //if(voltage[0] < 0) voltage[0] = 0;
-  voltage[1] = int((voltage[1] * 0.804 + 129) * 5.7);  // pin33 battery  voltage divider 47k:10k 5.7:1
-  voltage[2] = int((voltage[2] * 0.804 + 129));   // voltage difference pin35 - pin34 x 8.4 is corrent (x0.804)
-  voltage[3] = int((voltage[3] * 0.804 + 129));
-  voltage[4] = int((voltage[4] * 0.804 + 129) * 2.0);  // pin12 LiPo2     voltage divider 100k:100k 2:1
+  voltage[1] = int((voltage[1] * 0.83 + 150) * 5.7);  // pin33 battery  voltage divider 47k:10k 5.7:1
+  // voltage[2} is difference pin34 to 1.580 Volt - over 1.6 Ohm - current is 1/1.6 voltage
+  voltage[2] = int(((voltage[2] * 0.83 + 150) - 1580) / 1.6);
+  // voltage[3} is difference pin35 to 1.580 Volt - over 0.1 Ohm - current is 1/0.1 voltage
+  voltage[3] = int(((voltage[3] * 0.83 + 150) - 1644) * 10);
+  voltage[4] = int((voltage[4] * 0.83 + 150) * 2.0);  // pin12 LiPo2     voltage divider 100k:100k 2:1
   Serial.print("Boot number: ");
   Serial.println(bootCount);  
 }
