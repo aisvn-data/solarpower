@@ -14,7 +14,7 @@ const char* ssid     = "REPLACE_WITH_YOUR_SSID";
 const char* password = "REPLACE_WITH_YOUR_PASSWORD";
 
 // Replace with your unique IFTTT URL resource
-const char* resource = "/trigger/solar/with/key/nAZjOphL3d-ZO4N3k64-1A7gTlNSrxMJdmqy3";
+const char* resource = "/trigger/solar/with/key/nAZjOphL3d-N0sne5e-h3r3-1A7gTlNSrxMJdmqy3";
 
 // Maker Webhooks IFTTT
 const char* server = "maker.ifttt.com";
