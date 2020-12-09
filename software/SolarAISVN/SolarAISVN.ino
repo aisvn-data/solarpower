@@ -1,7 +1,4 @@
-// Solar- and windmeter at AISVN - test edition
-// 2020/06/05 v0.3
-//
-// data collection over the weekend - school ended on Friday June 5th, 2020
+// Solar- and windmeter at AISVN v0.4 2020/06/07
  
 #include <WiFi.h>
 #include <Wire.h>
@@ -23,11 +20,12 @@ const char* server = "maker.ifttt.com";
 // Time to sleep
 uint64_t uS_TO_S_FACTOR = 1000000;  // Conversion factor for micro seconds to seconds
 // sleep for 2 minutes = 120 seconds
-uint64_t TIME_TO_SLEEP = 120;
+uint64_t TIME_TO_SLEEP = 60;
 
 int voltage[8] = {0, 0, 0, 0, 0, 0, 0, 0};       // all voltages in millivolt
 int pins[8] = {32, 33, 34, 35, 25, 26, 27, 13};   // solar, battery, load_1, load_2, LiPo, wind, dump
 int ledPin = 5;
+int zeit = millis();
 
 void setup() {
   pinMode(ledPin, OUTPUT);
@@ -136,6 +134,7 @@ void makeIFTTTRequest() {
 void measureVoltages() {
   WRITE_PERI_REG(SENS_SAR_READ_CTRL2_REG, reg_b); // only needed after deep sleep
   SET_PERI_REG_MASK(SENS_SAR_READ_CTRL2_REG, SENS_SAR2_DATA_INV);
+  zeit = millis();
   Serial.print(" ** Voltages measured: ");
   for(int i = 0; i < 8; i++) {
     voltage[i] = analogRead( pins[i] );
@@ -145,9 +144,32 @@ void measureVoltages() {
     Serial.print(voltage[i]);
     Serial.print("  ");
   }
-  voltage[0] = int((3300 - voltage[0]) * 9.4);  // pin34 solar  voltage divider 11kOhm 11:1
-  voltage[1] = int((3300 - voltage[1]) * 9.4);  // pin34 solar  voltage divider 11kOhm 11:1
-  voltage[7] = int(voltage[7] * 2);            // pin26 LiPo   voltage divider 100kOhm 2:1
+  
+  // Test: suspersample pin13 10 times to voltage[6]
+  voltage[6] = 0;
+  for(int i = 0; i < 10; i++) {
+    voltage[6] = voltage[6] + analogRead( 13 );
+  }
+  voltage[6] = int( (voltage[6] / 10 * 0.826 + 150 ) * 2);
+  
+  // Test: suspersample pin13 100 times to voltage[5]
+  voltage[5] = 0;
+  for(int i = 0; i < 100; i++) {
+    voltage[5] = voltage[5] + analogRead( 13 );
+  }
+  voltage[5] = int( (voltage[5] / 100 * 0.826 + 150 ) * 2);    
+
+  
+  // 32,    33,      34,       35,       25,   26,   27,   13
+  // solar, battery, currentA, currentB, load, wind, dump, LiPo  
+  voltage[0] = int((3300 - voltage[0]) * 9.4);  // pin32 solar    voltage divider 10k : 1.2 k Ohm 1:1
+  voltage[1] = int((3300 - voltage[1]) * 9.4);  // pin33 battery  voltage divider 10k : 1.2 k Ohm 1:1
+  voltage[7] = int(voltage[7] * 2);             // pin26 LiPo     voltage divider 100kOhm 2:1
   Serial.print("Boot number: ");
   Serial.println(bootCount);  
+  Serial.print("Millisecond to measure: ");
+  //zeit = zeit - millis();
+  Serial.print(millis());
+  Serial.print(" - ");
+  Serial.println(zeit);
 }
