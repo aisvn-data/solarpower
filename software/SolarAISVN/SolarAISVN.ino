@@ -1,4 +1,4 @@
-// Solarmeter first attempt
+// Solarmeter second attempt - corrected voltages, battery included
 // Inspired by https://randomnerdtutorials.com/esp32-esp8266-publish-sensor-readings-to-google-sheets/
  
 #ifdef ESP32
@@ -25,14 +25,21 @@ uint64_t uS_TO_S_FACTOR = 1000000;  // Conversion factor for micro seconds to se
 uint64_t TIME_TO_SLEEP = 120;
 
 int adcValue = 0;
+int batValue = 0;
 
 void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);  
   Serial.begin(115200); 
-  delay(2000);
+  delay(50);
+  digitalWrite(LED_BUILTIN, HIGH);   
+  delay(1000);
 
+  digitalWrite(LED_BUILTIN, LOW);  
   initWifi();
   makeIFTTTRequest();
-    
+  digitalWrite(LED_BUILTIN, HIGH); 
+
   #ifdef ESP32
     // enable timer deep sleep
     esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);    
@@ -93,8 +100,9 @@ void makeIFTTTRequest() {
 
   // raw and converted voltage reading
   adcValue = analogRead( 34 );
-  String jsonObject = String("{\"value1\":\"") + adcValue + "\",\"value2\":\"" + (adcValue * 2.4)
-                      + "\",\"value3\":\"" + millis() + "\"}";
+  batValue = analogRead( 35 );
+  String jsonObject = String("{\"value1\":\"") + adcValue + "\",\"value2\":\"" + int((adcValue * 0.826 + 150) * 3)
+                      + "\",\"value3\":\"" + int((batValue * 0.826 + 150) * 2) + "\"}";
                       
   // Comment the previous line and uncomment the next line to publish temperature readings in Fahrenheit                    
   /*String jsonObject = String("{\"value1\":\"") + (1.8 * bme.readTemperature() + 32) + "\",\"value2\":\"" 
