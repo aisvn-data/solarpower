@@ -1,5 +1,8 @@
 # Solarpower at AISVN
 
+[![GitHub release](https://img.shields.io/github/release/aisvn-data/solarpower.svg)](https://GitHub.com/aisvn-data/solarpower/releases/)
+[![MIT license](https://img.shields.io/github/license/aisvn-data/solarpower)](https://aisvn-data.mit-license.org/)
+
 Collect data from solar panel and wind generator at AISVN - project for IB Physics. Here the battery voltage over the first week:
 
 ![battery first week](pic/2020-05-26_week.jpg)
