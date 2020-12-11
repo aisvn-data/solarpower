@@ -6,15 +6,15 @@ This project continuously measures the output power of a solar cell and a wind g
 
 This is how our outdoor setup with one 500W wind generator and a 60W solar panel looks like. Two smaller panels for ESP32 power and hybrid generator are not shown.
 
-![Setup roof](pic/2020-06-23_roof.jpg)
+![Setup roof](2020-06-23_roof.jpg)
 
 The electronics part in the room below looks like this:
 
-![Setup June 2020](pic/2020-06-12_setup.jpg)
+![Setup June 2020](2020-06-12_setup.jpg)
 
 And this is a sample data collection from one of the first days:
 
-![data June 11th](pic/2020-06-11_datacollection.png)
+![data June 11th](2020-06-11_datacollection.png)
 
 ## Setup
 
@@ -24,11 +24,11 @@ The initial setup from December 2019 requires a Laptop with Vernier software to 
 
 This is the circuit diagram from June 5th, 2020 (last day of school):
 
-![Setup June 2020](pic/20200605_circuit.png)
+![Setup June 2020](20200605_circuit.png)
 
 ## Materials
 
-<img src="pic/TTGO_ESP32.jpg" width="30%" align="right">
+<img src="TTGO_ESP32.jpg" width="30%" align="right">
 
 We take an ESP32 for measuring and transmitting the data over Wifi.
 
@@ -288,15 +288,15 @@ I finally create a Github repository to document this project. The ESP32 were de
 
 The ADC of the ESP32 is not very linear. But we want to use it to measure the voltage of the solar pannel under different load situations. There might be a compensation function. The procedure and measurement was done by [Fernando Koyanagi](https://www.fernandok.com/) from Florianópolis in Brazil and published in [instructables](https://www.instructables.com/id/Professionals-Know-This/).
 
-![ADC reading](pic/adc_esp32.jpg)
+![ADC reading](adc_esp32.jpg)
 
 For the future design of April 2020 the voltage is measured by the ESP32 and the value transfered to a database in the internet every 5 minutes. This gives 288 data points per day. An article at [randomnerdtutorials](https://randomnerdtutorials.com/esp32-adc-analog-read-arduino-ide/) explains the setup and programming very well;
 
-![Setup of ESP32](pic/analog_input_esp32.jpg)
+![Setup of ESP32](analog_input_esp32.jpg)
 
 Additionally there are 4 digital switches for different loads planned. The ESP32 is activating them prior to the measurement and can combine the swithces for 16 different load values. The setup now looks like this:
 
-![adjustable load setup ESP32](pic/setup_2020-03-20.jpg)
+![adjustable load setup ESP32](setup_2020-03-20.jpg)
 
 With the 4 switches we can create 16 datapoints, that the ESP32 can read in 12 bit. Every 5 minutes we create therefore 24 byte of data. Over a day this accumulates to 6912 byte and in a year all data collected is 2.5 MByte.
 
