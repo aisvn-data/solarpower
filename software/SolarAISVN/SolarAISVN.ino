@@ -1,4 +1,4 @@
-// Solar- and windmeter at AISVN v0.4 2020/06/07
+// Solar- and windmeter at AISVN v0.5 2020/06/08
  
 #include <WiFi.h>
 #include <Wire.h>
@@ -22,8 +22,11 @@ uint64_t uS_TO_S_FACTOR = 1000000;  // Conversion factor for micro seconds to se
 // sleep for 2 minutes = 120 seconds
 uint64_t TIME_TO_SLEEP = 60;
 
-int voltage[8] = {0, 0, 0, 0, 0, 0, 0, 0};       // all voltages in millivolt
-int pins[8] = {32, 33, 34, 35, 25, 26, 27, 13};   // solar, battery, load_1, load_2, LiPo, wind, dump
+//    32,      33,       34,       35,   14,   26,   27,     12,   13
+// solar, battery, currentA, currentB, load, wind, dump, solar2, LiPo  
+
+int voltage[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};       // all voltages in millivolt
+int pins[9] = {32, 33, 34, 35, 14, 26, 27, 12, 13};   // solar, battery, curA, curB, load, wind, dump, solar2, LiPo
 int ledPin = 5;
 int zeit = millis();
 
@@ -106,7 +109,8 @@ void makeIFTTTRequest() {
 
   String jsonObject = String("{\"value1\":\"") + voltage[0] + "|||" + voltage[1] + "|||" + voltage[2]
                           + "\",\"value2\":\"" + voltage[3] + "|||" + voltage[4] + "|||" + voltage[5]
-                          + "\",\"value3\":\"" + voltage[6] + "|||" + voltage[7] + "|||" +bootCount + "\"}";
+                          + "\",\"value3\":\"" + voltage[6] + "|||" + voltage[7] + "|||" + voltage[8]
+                          + "|||" + bootCount + "\"}";
                       
   client.println(String("POST ") + resource + " HTTP/1.1");
   client.println(String("Host: ") + server); 
@@ -136,35 +140,28 @@ void measureVoltages() {
   SET_PERI_REG_MASK(SENS_SAR_READ_CTRL2_REG, SENS_SAR2_DATA_INV);
   zeit = millis();
   Serial.print(" ** Voltages measured: ");
-  for(int i = 0; i < 8; i++) {
-    voltage[i] = analogRead( pins[i] );
-    voltage[i] = int( voltage[i] * 0.826 + 150 );
-    if( voltage[i] == 150 ) voltage[i] = 0;
-    if( voltage[i] > 3300 ) voltage[i] = 3300;
+  for(int i = 0; i < 9; i++) {
+    // multisample 100x to reduce noise - 9.5 microseconds x 100 = 1ms per voltage
+    voltage[i] = 0;
+    for(int multi = 0; multi < 100; multi++) {
+      voltage[i] += analogRead( pins[i] );
+    }
+    voltage[i] = voltage[i] / 100;
     Serial.print(voltage[i]);
     Serial.print("  ");
   }
-  
-  // Test: suspersample pin13 10 times to voltage[6]
-  voltage[6] = 0;
-  for(int i = 0; i < 10; i++) {
-    voltage[6] = voltage[6] + analogRead( 13 );
-  }
-  voltage[6] = int( (voltage[6] / 10 * 0.826 + 150 ) * 2);
-  
-  // Test: suspersample pin13 100 times to voltage[5]
-  voltage[5] = 0;
-  for(int i = 0; i < 100; i++) {
-    voltage[5] = voltage[5] + analogRead( 13 );
-  }
-  voltage[5] = int( (voltage[5] / 100 * 0.826 + 150 ) * 2);    
-
-  
-  // 32,    33,      34,       35,       25,   26,   27,   13
-  // solar, battery, currentA, currentB, load, wind, dump, LiPo  
-  voltage[0] = int((3300 - voltage[0]) * 9.4);  // pin32 solar    voltage divider 10k : 1.2 k Ohm 1:1
-  voltage[1] = int((3300 - voltage[1]) * 9.4);  // pin33 battery  voltage divider 10k : 1.2 k Ohm 1:1
-  voltage[7] = int(voltage[7] * 2);             // pin26 LiPo     voltage divider 100kOhm 2:1
+  // conversion to voltage prior to voltage divider
+  //    32,      33,       34,       35,   14,   26,   27,     12,   13
+  // solar, battery, currentA, currentB, load, wind, dump, solar2, LiPo  
+  voltage[0] = int((4096 - voltage[0]) * 7.52 - 1000);  // pin32 solar    voltage divider 10k : 1.2 k Ohm 1:1
+  voltage[1] = int((4096 - voltage[1]) * 7.52 - 1000);  // pin33 battery  voltage divider 10k : 1.2 k Ohm 1:1
+  voltage[2] = int((voltage[2]) * 0.804 + 129);         // pin34 voltage solar minus green LED
+  voltage[3] = int((voltage[3]) * 0.804 + 129);         // pin35 voltage solar minus green LED minus 0.1 Ohm serial
+  voltage[4] = int((4096 - voltage[4]) * 7.52 - 1000);  // pin14 load     voltage divider 10k : 1.2 k Ohm 1:1
+  voltage[5] = int((4096 - voltage[5]) * 7.52 - 1000);  // pin26 wind     voltage divider 10k : 1.2 k Ohm 1:1
+  voltage[6] = int((voltage[6]) * 1.608 + 258);         // pin27 dump     not connected yet
+  voltage[7] = int((voltage[7]) * 4.583 + 735);         // pin12 Solar2   voltage divider 4.7k : 1k
+  voltage[8] = int((voltage[8]) * 1.608 + 258);         // pin13 LiPo     voltage divider 100kOhm 2:1
   Serial.print("Boot number: ");
   Serial.println(bootCount);  
   Serial.print("Millisecond to measure: ");
