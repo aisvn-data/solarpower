@@ -13,3 +13,15 @@ We collected some data over time:
 ## Setup AISVN
 
 ![setup2](2020-05-15_solar.jpg)
+
+## Electric circuit design
+
+Before starting the wiring we created a sketch of the proposed connections:
+
+![setup from January](setup_2020-01-16.jpg)
+
+## Measurement data
+
+This is the first measured data from May 2020:
+
+![data from May 2020](2020-05-26_week.jpg)
