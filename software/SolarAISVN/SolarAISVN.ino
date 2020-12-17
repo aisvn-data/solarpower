@@ -1,4 +1,8 @@
-// Solar- and windmeter at AISVN v0.5 2020/06/08
+// Solar- and windmeter at AISVN v0.6
+// 2020/06/10
+// 
+// voltages calibrated
+// measurements of wind generator included
  
 #include <WiFi.h>
 #include <Wire.h>
@@ -8,8 +12,8 @@ RTC_DATA_ATTR int bootCount = 0;
 static RTC_NOINIT_ATTR int reg_b; // place in RTC slow memory so available after deepsleep
 
 // Replace with your SSID and Password
-const char* ssid     = "ssid";  
-const char* password = "pass";
+const char* ssid     = "REPLACE_WITH_YOUR_SSID";
+const char* password = "REPLACE_WITH_YOUR_PASSWORD";
 
 // Replace with your unique IFTTT URL resource
 const char* resource = "/trigger/data/with/key/value";
