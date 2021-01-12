@@ -1,8 +1,13 @@
-// Solar- and windmeter at AISVN v0.6
-// 2020/06/10
-// 
-// voltages calibrated
-// measurements of wind generator included
+// Solar- and windmeter at AISVN v0.7 
+// 2020/06/15
+//
+//
+// voltages converted on ESP32
+// submission time back to 120 seconds
+//
+// pin:       32,      33,       34,       35,   14,   26,   27,     12,   13
+// value:  solar, battery, currentA, currentB, load, wind, dump, solar2, LiPo
+// submit: solar, battery, current, load, wind, solar2, LiPo, bootCount
  
 #include <WiFi.h>
 #include <Wire.h>
@@ -24,7 +29,7 @@ const char* server = "maker.ifttt.com";
 // Time to sleep
 uint64_t uS_TO_S_FACTOR = 1000000;  // Conversion factor for micro seconds to seconds
 // sleep for 2 minutes = 120 seconds
-uint64_t TIME_TO_SLEEP = 60;
+uint64_t TIME_TO_SLEEP = 120;
 
 //    32,      33,       34,       35,   14,   26,   27,     12,   13
 // solar, battery, currentA, currentB, load, wind, dump, solar2, LiPo  
@@ -32,7 +37,6 @@ uint64_t TIME_TO_SLEEP = 60;
 int voltage[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};       // all voltages in millivolt
 int pins[9] = {32, 33, 34, 35, 14, 26, 27, 12, 13};   // solar, battery, curA, curB, load, wind, dump, solar2, LiPo
 int ledPin = 5;
-int zeit = millis();
 
 void setup() {
   pinMode(ledPin, OUTPUT);
@@ -112,8 +116,8 @@ void makeIFTTTRequest() {
   Serial.println(resource);
 
   String jsonObject = String("{\"value1\":\"") + voltage[0] + "|||" + voltage[1] + "|||" + voltage[2]
-                          + "\",\"value2\":\"" + voltage[3] + "|||" + voltage[4] + "|||" + voltage[5]
-                          + "\",\"value3\":\"" + voltage[6] + "|||" + voltage[7] + "|||" + voltage[8]
+                          + "\",\"value2\":\"" + voltage[4] + "|||" + voltage[5]
+                          + "\",\"value3\":\"" + voltage[7] + "|||" + voltage[8]
                           + "|||" + bootCount + "\"}";
                       
   client.println(String("POST ") + resource + " HTTP/1.1");
@@ -142,7 +146,6 @@ void makeIFTTTRequest() {
 void measureVoltages() {
   WRITE_PERI_REG(SENS_SAR_READ_CTRL2_REG, reg_b); // only needed after deep sleep
   SET_PERI_REG_MASK(SENS_SAR_READ_CTRL2_REG, SENS_SAR2_DATA_INV);
-  zeit = millis();
   Serial.print(" ** Voltages measured: ");
   for(int i = 0; i < 9; i++) {
     // multisample 100x to reduce noise - 9.5 microseconds x 100 = 1ms per voltage
@@ -159,8 +162,9 @@ void measureVoltages() {
   // solar, battery, currentA, currentB, load, wind, dump, solar2, LiPo  
   voltage[0] = int((4096 - voltage[0]) * 7.52 - 1000);  // pin32 solar    voltage divider 10k : 1.2 k Ohm 1:1
   voltage[1] = int((4096 - voltage[1]) * 7.52 - 1000);  // pin33 battery  voltage divider 10k : 1.2 k Ohm 1:1
-  voltage[2] = int((voltage[2]) * 0.804 + 129);         // pin34 voltage solar minus green LED
-  voltage[3] = int((voltage[3]) * 0.804 + 129);         // pin35 voltage solar minus green LED minus 0.1 Ohm serial
+  //voltage[2] = int((voltage[2]) * 0.804 + 129);         // pin34 voltage solar minus green LED
+  //voltage[3] = int((voltage[3]) * 0.804 + 129);         // pin35 voltage solar minus green LED minus 0.1 Ohm serial
+  voltage[2] = int((voltage[3] - voltage[2]) * 6.75);   // voltage difference pin35 - pin34 x 8.4 is corrent (x0.804)
   voltage[4] = int((4096 - voltage[4]) * 7.52 - 1000);  // pin14 load     voltage divider 10k : 1.2 k Ohm 1:1
   voltage[5] = int((4096 - voltage[5]) * 7.52 - 1000);  // pin26 wind     voltage divider 10k : 1.2 k Ohm 1:1
   voltage[6] = int((voltage[6]) * 1.608 + 258);         // pin27 dump     not connected yet
@@ -168,9 +172,4 @@ void measureVoltages() {
   voltage[8] = int((voltage[8]) * 1.608 + 258);         // pin13 LiPo     voltage divider 100kOhm 2:1
   Serial.print("Boot number: ");
   Serial.println(bootCount);  
-  Serial.print("Millisecond to measure: ");
-  //zeit = zeit - millis();
-  Serial.print(millis());
-  Serial.print(" - ");
-  Serial.println(zeit);
 }
