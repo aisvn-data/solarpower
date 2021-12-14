@@ -1,27 +1,30 @@
-// Solar- and windmeter at AISVN v0.7 
-// 2020/06/15
+// Solar- and windmeter at AISVN v0.8 
+// 2020/06/16
 //
-//
-// voltages converted on ESP32
-// submission time back to 120 seconds
+// no more negative voltages
+// offset for solar2 corrected
+// credentials in separate file
 //
 // pin:       32,      33,       34,       35,   14,   26,   27,     12,   13
-// value:  solar, battery, currentA, currentB, load, wind, dump, solar2, LiPo
-// submit: solar, battery, current, load, wind, solar2, LiPo, bootCount
- 
+// value:  solar, battery, currentA, currentB, load, wind, temp, solar2, LiPo
+//
+// submit: solar, battery, current, load, wind, temp, solar2, LiPo, bootCount
+//             0,       1,       2,    4,    5,    6,      7,    8,
+
 #include <WiFi.h>
 #include <Wire.h>
+#include <credentials.h>  // WiFi credentials in separate file
 #include <soc/sens_reg.h>
 
 RTC_DATA_ATTR int bootCount = 0;
 static RTC_NOINIT_ATTR int reg_b; // place in RTC slow memory so available after deepsleep
 
-// Replace with your SSID and Password
-const char* ssid     = "REPLACE_WITH_YOUR_SSID";
-const char* password = "REPLACE_WITH_YOUR_PASSWORD";
+// Replace with your SSID and Password + uncomment
+// const char* ssid     = "REPLACE_WITH_YOUR_SSID";
+// const char* password = "REPLACE_WITH_YOUR_PASSWORD";
 
-// Replace with your unique IFTTT URL resource
-const char* resource = "/trigger/data/with/key/value";
+// Replace with your unique IFTTT URL resource + uncomment
+// const char* resource = "/trigger/data/with/key/value";
 
 // Maker Webhooks IFTTT
 const char* server = "maker.ifttt.com";
@@ -116,7 +119,7 @@ void makeIFTTTRequest() {
   Serial.println(resource);
 
   String jsonObject = String("{\"value1\":\"") + voltage[0] + "|||" + voltage[1] + "|||" + voltage[2]
-                          + "\",\"value2\":\"" + voltage[4] + "|||" + voltage[5]
+                          + "\",\"value2\":\"" + voltage[4] + "|||" + voltage[5] + "|||" + voltage[6]
                           + "\",\"value3\":\"" + voltage[7] + "|||" + voltage[8]
                           + "|||" + bootCount + "\"}";
                       
@@ -161,14 +164,18 @@ void measureVoltages() {
   //    32,      33,       34,       35,   14,   26,   27,     12,   13
   // solar, battery, currentA, currentB, load, wind, dump, solar2, LiPo  
   voltage[0] = int((4096 - voltage[0]) * 7.52 - 1000);  // pin32 solar    voltage divider 10k : 1.2 k Ohm 1:1
+  if(voltage[0] < 0) voltage[0] = 0;
   voltage[1] = int((4096 - voltage[1]) * 7.52 - 1000);  // pin33 battery  voltage divider 10k : 1.2 k Ohm 1:1
   //voltage[2] = int((voltage[2]) * 0.804 + 129);         // pin34 voltage solar minus green LED
   //voltage[3] = int((voltage[3]) * 0.804 + 129);         // pin35 voltage solar minus green LED minus 0.1 Ohm serial
   voltage[2] = int((voltage[3] - voltage[2]) * 6.75);   // voltage difference pin35 - pin34 x 8.4 is corrent (x0.804)
   voltage[4] = int((4096 - voltage[4]) * 7.52 - 1000);  // pin14 load     voltage divider 10k : 1.2 k Ohm 1:1
+  if(voltage[4] < 0) voltage[4] = 0;  
   voltage[5] = int((4096 - voltage[5]) * 7.52 - 1000);  // pin26 wind     voltage divider 10k : 1.2 k Ohm 1:1
-  voltage[6] = int((voltage[6]) * 1.608 + 258);         // pin27 dump     not connected yet
+  if(voltage[5] < 0) voltage[5] = 0;  
+  voltage[6] = int((voltage[6]) * 0.804 + 129);         // pin27 temp     not connected yet
   voltage[7] = int((voltage[7]) * 4.583 + 735);         // pin12 Solar2   voltage divider 4.7k : 1k
+  if(voltage[7] < 736) voltage[7] = 0;
   voltage[8] = int((voltage[8]) * 1.608 + 258);         // pin13 LiPo     voltage divider 100kOhm 2:1
   Serial.print("Boot number: ");
   Serial.println(bootCount);  
