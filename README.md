@@ -2,6 +2,7 @@
 
 [![GitHub release](https://img.shields.io/github/release/aisvn-data/solarpower.svg)](https://GitHub.com/aisvn-data/solarpower/releases/)
 [![MIT license](https://img.shields.io/github/license/aisvn-data/solarpower)](https://aisvn-data.mit-license.org/)
+[![Deploy Jekyll with GitHub Pages dependencies preinstalled](https://github.com/aisvn-data/solarpower/actions/workflows/jekyll-gh-pages.yml/badge.svg)](https://github.com/aisvn-data/solarpower/actions/workflows/jekyll-gh-pages.yml)
 
 Collect data from solar panel and wind generator at AISVN - project for IB Physics. Here the battery voltage over the first week:
 
