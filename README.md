@@ -20,6 +20,8 @@ We collected some data over time:
 
 ![setup1](pic/2020-05-16_setup.jpg)
 
+This setup collected data from 2020 to December 2023. Then IFTT deactivated the webhook functionality to process signals into a Google sheet. Work will continue.
+
 ## Setup AISVN
 
 ![setup2](pic/2020-05-15_solar.jpg)
