@@ -1,19 +1,19 @@
-// Solar- and windmeter at AISVN v0.8 
-// 2020/06/16
+// Solar- and windmeter at AISVN v0.9 
+// 2020/06/17
 //
-// no more negative voltages
-// offset for solar2 corrected
-// credentials in separate file
+// transmitted data moved from millivolt to volt and milliAmpere to Ampere
+// Transmission of power value included
+// WiFi credentials exported to credentials.h
 //
 // pin:       32,      33,       34,       35,   14,   26,   27,     12,   13
 // value:  solar, battery, currentA, currentB, load, wind, temp, solar2, LiPo
 //
-// submit: solar, battery, current, load, wind, temp, solar2, LiPo, bootCount
-//             0,       1,       2,    4,    5,    6,      7,    8,
-
+// submit: solar, battery, current, power, load, wind, temp, solar2, LiPo, bootCount
+//             0,       1,       2,     3,    4,    5,    6,      7,    8,
+ 
 #include <WiFi.h>
 #include <Wire.h>
-#include <credentials.h>  // WiFi credentials in separate file
+#include <credentials.h>  // inspired by Andreas Spiess - WiFi credentials in separate file
 #include <soc/sens_reg.h>
 
 RTC_DATA_ATTR int bootCount = 0;
@@ -35,10 +35,10 @@ uint64_t uS_TO_S_FACTOR = 1000000;  // Conversion factor for micro seconds to se
 uint64_t TIME_TO_SLEEP = 120;
 
 //    32,      33,       34,       35,   14,   26,   27,     12,   13
-// solar, battery, currentA, currentB, load, wind, dump, solar2, LiPo  
+// solar, battery, currentA, currentB, load, wind, temp, solar2, LiPo  
 
 int voltage[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};       // all voltages in millivolt
-int pins[9] = {32, 33, 34, 35, 14, 26, 27, 12, 13};   // solar, battery, curA, curB, load, wind, dump, solar2, LiPo
+int pins[9] = {32, 33, 34, 35, 14, 26, 27, 12, 13};   // solar, battery, curA, curB, load, wind, temp, solar2, LiPo
 int ledPin = 5;
 
 void setup() {
@@ -118,9 +118,15 @@ void makeIFTTTRequest() {
   Serial.print("Request resource: "); 
   Serial.println(resource);
 
-  String jsonObject = String("{\"value1\":\"") + voltage[0] + "|||" + voltage[1] + "|||" + voltage[2]
-                          + "\",\"value2\":\"" + voltage[4] + "|||" + voltage[5] + "|||" + voltage[6]
-                          + "\",\"value3\":\"" + voltage[7] + "|||" + voltage[8]
+  String jsonObject = String("{\"value1\":\"") + voltage[0]/1000.0 
+                                       + "|||" + voltage[1]/1000.0 
+                                       + "|||" + voltage[2]/1000.0
+                          + "\",\"value2\":\"" + voltage[3]/1000.0 
+                                       + "|||" + voltage[4]/1000.0
+                                       + "|||" + voltage[5]/1000.0
+                          + "\",\"value3\":\"" + voltage[6]/10.0 
+                                       + "|||" + voltage[7]/1000.0
+                                       + "|||" + voltage[8]/1000.0
                           + "|||" + bootCount + "\"}";
                       
   client.println(String("POST ") + resource + " HTTP/1.1");
@@ -161,14 +167,18 @@ void measureVoltages() {
     Serial.print("  ");
   }
   // conversion to voltage prior to voltage divider
-  //    32,      33,       34,       35,   14,   26,   27,     12,   13
-  // solar, battery, currentA, currentB, load, wind, dump, solar2, LiPo  
+ 
+  // pin:       32,      33,       34,       35,   14,   26,   27,     12,   13
+  // value:  solar, battery, currentA, currentB, load, wind, temp, solar2, LiPo
+  //
+  // submit: solar, battery, current, power, load, wind, temp, solar2, LiPo, bootCount
+  //             0,       1,       2,     3,    4,    5,    6,      7,    8,
+  
   voltage[0] = int((4096 - voltage[0]) * 7.52 - 1000);  // pin32 solar    voltage divider 10k : 1.2 k Ohm 1:1
   if(voltage[0] < 0) voltage[0] = 0;
   voltage[1] = int((4096 - voltage[1]) * 7.52 - 1000);  // pin33 battery  voltage divider 10k : 1.2 k Ohm 1:1
-  //voltage[2] = int((voltage[2]) * 0.804 + 129);         // pin34 voltage solar minus green LED
-  //voltage[3] = int((voltage[3]) * 0.804 + 129);         // pin35 voltage solar minus green LED minus 0.1 Ohm serial
-  voltage[2] = int((voltage[3] - voltage[2]) * 6.75);   // voltage difference pin35 - pin34 x 8.4 is corrent (x0.804)
+  voltage[2] = int((voltage[3] - voltage[2]) * 5.79);   // voltage difference pin35 - pin34 x 8.4 is corrent (x0.804)
+  voltage[3] = int(voltage[2] * voltage[0] / 1000);
   voltage[4] = int((4096 - voltage[4]) * 7.52 - 1000);  // pin14 load     voltage divider 10k : 1.2 k Ohm 1:1
   if(voltage[4] < 0) voltage[4] = 0;  
   voltage[5] = int((4096 - voltage[5]) * 7.52 - 1000);  // pin26 wind     voltage divider 10k : 1.2 k Ohm 1:1
