@@ -87,3 +87,7 @@ void makeIFTTTRequest() {  // Make an HTTP request to the IFTTT web service
   client.stop(); 
 }
 ```
+
+## History 
+
+This repository was created in May 25, 2020. Data collection worked until the end of 2020. The solar power for the ESP32 to collect and submit data finally gave in.
