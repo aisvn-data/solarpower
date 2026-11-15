@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import unicodedata
 
 from freetrans import SyncTranslator, Translator
 
@@ -12,7 +13,9 @@ CASES = [
 ]
 failures = []
 
-
+def norm(s: str) -> str:
+    return unicodedata.normalize("NFC", s).lower()
+    
 def check(label, ok, detail=""):
     print(f"[{'OK' if ok else 'FAIL'}] {label} {detail}")
     if not ok:
@@ -23,7 +26,7 @@ async def run_async():
     async with Translator(ipv4=True) as t:
         for text, dest, expected in CASES:
             r = await t.translate(text, dest=dest)
-            check(f"async {text!r}->{dest}", expected in r.text.lower(), repr(r.text))
+            check(f"async {text!r}->{dest}", norm(expected) in norm(r.text), repr(r.text))
 
         # batch
         items = ["Good morning", "Good afternoon", "Good night"]
@@ -35,7 +38,7 @@ async def run_async():
 def run_sync():
     with SyncTranslator(ipv4=True) as t:
         r = t.translate("Hello world", dest="es")
-        check("sync hello->es", "hola" in r.text.lower(), repr(r.text))
+        check("sync hello->es", norm("hola") in norm(r.text), repr(r.text))
 
         d = t.detect("이 문장은 한국어로 작성되었습니다.")
         check("detect korean", d.lang == "ko", f"lang={d.lang} conf={d.confidence}")
