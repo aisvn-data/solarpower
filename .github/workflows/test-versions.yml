@@ -1,0 +1,32 @@
+name: python-versions
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "14 3 * * 1"   # weekly, catches Google endpoint changes
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.11", "3.13", "3.15"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+
+      - name: Install freetrans-py from PyPI
+        run: |
+          python -m pip install --upgrade pip
+          pip install freetrans-py
+          pip show freetrans-py curl-cffi httpx
+
+      - name: Smoke test
+        run: python smoke_test.py
