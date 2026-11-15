@@ -9,15 +9,15 @@ on:
 
 jobs:
   smoke:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.11", "3.13", "3.15"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
@@ -28,5 +28,8 @@ jobs:
           pip install freetrans-py
           pip show freetrans-py curl-cffi httpx
 
+      - name: Check smoke_test.py exists
+        run: ls -la .github/smoke_test.py
+
       - name: Smoke test
-        run: python smoke_test.py
+        run: python .github/smoke_test.py
